@@ -4,6 +4,8 @@ import fileUpload from "express-fileupload"
 import cors from "cors"
 import { config } from "dotenv"
 
+import { errorHandlerMiddleware } from "./middleware/index.middleware.js"
+
 import routes from "./routes/index.router.js"
 
 config()
@@ -34,5 +36,6 @@ export class App {
 
   #_routes() {
     this.#_app.use("/api/v1", routes)
+    this.#_app.use(errorHandlerMiddleware)
   }
 }
