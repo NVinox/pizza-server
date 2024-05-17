@@ -4,7 +4,7 @@ import fileUpload from "express-fileupload"
 import cors from "cors"
 import { config } from "dotenv"
 
-import routes from "./routes/index.js"
+import routes from "./routes/index.router.js"
 
 config()
 
