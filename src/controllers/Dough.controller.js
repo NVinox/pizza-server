@@ -63,7 +63,7 @@ export class DoughController {
     try {
       const doughId = +req.body.id
       const doughCaption = req.body.caption
-      const emptyFields = getEmptyFields({ caption: doughCaption })
+      const emptyFields = getEmptyFields({ caption: doughCaption, id: doughId })
 
       if (emptyFields) {
         return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
@@ -86,6 +86,37 @@ export class DoughController {
         .status(200)
         .json(
           new HttpResponse("OK", "OK", "Dough type is updated", updatedDough)
+        )
+    } catch {
+      return next(ApiError.internal())
+    }
+  }
+
+  delete = async (req, res, next) => {
+    try {
+      const doughId = +req.body.id
+      const emptyFields = getEmptyFields({ id: doughId })
+
+      if (emptyFields) {
+        return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
+      }
+
+      const foundDough = await this._prisma.dough.findUnique({
+        where: { id: doughId },
+      })
+
+      if (!foundDough) {
+        next(ApiError.notFound(`Dough id '${doughId}' does not exist`))
+      }
+
+      const deletedDough = await this._prisma.dough.delete({
+        where: { id: doughId },
+      })
+
+      return res
+        .status(200)
+        .json(
+          new HttpResponse("OK", "OK", "Dough type is deleted", deletedDough)
         )
     } catch {
       return next(ApiError.internal())
