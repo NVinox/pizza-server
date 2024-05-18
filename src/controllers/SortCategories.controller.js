@@ -66,4 +66,50 @@ export class SortCategoriesController {
       return next(ApiError.internal())
     }
   }
+
+  update = async (req, res, next) => {
+    try {
+      const sortCategoryTitle = req.body.text
+      const sortCategoryId = +req.body.id
+      const foundSortCategory = await this._prisma.sortCategory.findUnique({
+        where: {
+          id: sortCategoryId,
+        },
+      })
+
+      if (!foundSortCategory) {
+        return next(
+          ApiError.notFound(
+            `Sort category 'id = ${sortCategoryId}' does not exist`
+          )
+        )
+      }
+
+      if (!sortCategoryTitle) {
+        return next(ApiError.notFound("Filed 'text' is required"))
+      }
+
+      const updatedSortCategory = await this._prisma.sortCategory.update({
+        where: {
+          id: sortCategoryId,
+        },
+        data: {
+          text: sortCategoryTitle,
+        },
+      })
+
+      return res
+        .status(200)
+        .json(
+          new HttpResponse(
+            "OK",
+            "OK",
+            "Sort category is updated",
+            updatedSortCategory
+          )
+        )
+    } catch {
+      return next(ApiError.internal())
+    }
+  }
 }

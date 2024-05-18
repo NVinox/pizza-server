@@ -7,5 +7,6 @@ const sortCategoriesController = new SortCategoriesController()
 
 sortCategoriesRouter.post("/", sortCategoriesController.create)
 sortCategoriesRouter.get("/", sortCategoriesController.getAll)
+sortCategoriesRouter.put("/", sortCategoriesController.update)
 
 export default sortCategoriesRouter
