@@ -1,14 +1,21 @@
 import { HttpResponse } from "../domain/index.domain.js"
 import { ApiError } from "../error/index.error.js"
+import { PrismaClient } from "@prisma/client"
 
 export class CategoriesController {
-  async getCategories(req, res, next) {
+  _prisma
+
+  constructor() {
+    this._prisma = new PrismaClient()
+  }
+
+  getCategories = async (req, res, next) => {
     try {
-      return res.status(200).json(
-        new HttpResponse("OK", "OK", "Categories list", {
-          message: "Коллекция категорий",
-        })
-      )
+      const categories = await this._prisma.category.findMany()
+
+      return res
+        .status(200)
+        .json(new HttpResponse("OK", "OK", "Categories list", categories))
     } catch (error) {
       return next(ApiError.internal())
     }
