@@ -86,7 +86,7 @@ export class SortCategoriesController {
       }
 
       if (!sortCategoryTitle) {
-        return next(ApiError.notFound("Filed 'text' is required"))
+        return next(ApiError.badRequest("Filed 'text' is required"))
       }
 
       const updatedSortCategory = await this._prisma.sortCategory.update({
@@ -106,6 +106,44 @@ export class SortCategoriesController {
             "OK",
             "Sort category is updated",
             updatedSortCategory
+          )
+        )
+    } catch {
+      return next(ApiError.internal())
+    }
+  }
+
+  delete = async (req, res, next) => {
+    try {
+      const sortCategoryId = +req.body.id
+      const foundSortCategory = await this._prisma.sortCategory.findUnique({
+        where: {
+          id: sortCategoryId,
+        },
+      })
+
+      if (!foundSortCategory) {
+        return next(
+          ApiError.notFound(
+            `Sort category 'id = ${sortCategoryId}' does not exist`
+          )
+        )
+      }
+
+      const deletedCategory = await this._prisma.sortCategory.delete({
+        where: {
+          id: sortCategoryId,
+        },
+      })
+
+      return res
+        .status(200)
+        .json(
+          new HttpResponse(
+            "OK",
+            "OK",
+            "Sort category is deleted",
+            deletedCategory
           )
         )
     } catch {
