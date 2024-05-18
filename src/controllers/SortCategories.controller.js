@@ -9,6 +9,35 @@ export class SortCategoriesController {
     this._prisma = new PrismaClient()
   }
 
+  create = async (req, res, next) => {
+    try {
+      const categoryTitle = req.body.text
+
+      if (!categoryTitle) {
+        return next(ApiError.badRequest("Filed 'text' is required"))
+      }
+
+      const sortCategory = await this._prisma.sortCategory.create({
+        data: {
+          text: categoryTitle,
+        },
+      })
+
+      return res
+        .status(201)
+        .json(
+          new HttpResponse(
+            "CREATED",
+            "CREATED",
+            "Sort category is created",
+            sortCategory
+          )
+        )
+    } catch (e) {
+      return next(ApiError.internal())
+    }
+  }
+
   getAll = async (req, res, next) => {
     try {
       const sortCategories = await this._prisma.sortCategory.findMany({

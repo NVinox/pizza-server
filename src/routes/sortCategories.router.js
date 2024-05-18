@@ -5,6 +5,7 @@ import { SortCategoriesController } from "../controllers/SortCategories.controll
 const sortCategoriesRouter = Router()
 const sortCategoriesController = new SortCategoriesController()
 
+sortCategoriesRouter.post("/", sortCategoriesController.create)
 sortCategoriesRouter.get("/", sortCategoriesController.getAll)
 
 export default sortCategoriesRouter
