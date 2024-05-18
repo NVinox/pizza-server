@@ -11,10 +11,31 @@ export class DoughController {
     this._prisma = new PrismaClient()
   }
 
+  create = async (req, res, next) => {
+    try {
+      const body = { caption: req.body.caption }
+      const emptyFields = getEmptyFields(body)
+
+      if (emptyFields) {
+        return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
+      }
+
+      const dough = await this._prisma.dough.create({ data: body })
+
+      return res
+        .status(201)
+        .json(
+          new HttpResponse("CREATED", "CREATED", "Dough type is created", dough)
+        )
+    } catch {
+      return next(ApiError.internal())
+    }
+  }
+
   getAll = async (req, res, next) => {
     try {
       const doughList = await this._prisma.dough.findMany({
-        orderBy: { id: "desc" },
+        orderBy: { id: "asc" },
       })
 
       if (!doughList.length) {
