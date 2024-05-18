@@ -58,4 +58,37 @@ export class DoughController {
       return next(ApiError.internal())
     }
   }
+
+  update = async (req, res, next) => {
+    try {
+      const doughId = +req.body.id
+      const doughCaption = req.body.caption
+      const emptyFields = getEmptyFields({ caption: doughCaption })
+
+      if (emptyFields) {
+        return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
+      }
+
+      const foundDough = await this._prisma.dough.findUnique({
+        where: { id: doughId },
+      })
+
+      if (!foundDough) {
+        return next(ApiError.notFound(`Dough id '${doughId}' does not exist`))
+      }
+
+      const updatedDough = await this._prisma.dough.update({
+        data: { caption: doughCaption },
+        where: { id: doughId },
+      })
+
+      return res
+        .status(200)
+        .json(
+          new HttpResponse("OK", "OK", "Dough type is updated", updatedDough)
+        )
+    } catch {
+      return next(ApiError.internal())
+    }
+  }
 }

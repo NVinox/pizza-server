@@ -86,7 +86,7 @@ export class CategoriesController {
 
       if (!foundCategory) {
         return next(
-          ApiError.notFound(`Category 'id = ${categoryId}' does not exist`)
+          ApiError.notFound(`Category id '${categoryId}' does not exist`)
         )
       }
 
@@ -120,7 +120,7 @@ export class CategoriesController {
 
       if (!foundCategory) {
         return next(
-          ApiError.notFound(`Category 'id = ${categoryId}' does not exist`)
+          ApiError.notFound(`Category id '${categoryId}' does not exist`)
         )
       }
 

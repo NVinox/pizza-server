@@ -6,5 +6,6 @@ const doughController = new DoughController()
 
 doughRouter.post("/", doughController.create)
 doughRouter.get("/", doughController.getAll)
+doughRouter.put("/", doughController.update)
 
 export default doughRouter
