@@ -16,3 +16,13 @@ model SortCategory {
   id   Int    @id @default(autoincrement())
   text String
 }
+
+model Dough {
+  id      Int    @id @default(autoincrement())
+  caption String @unique
+}
+
+model Size {
+  id   Int @id @default(autoincrement())
+  size Int @unique
+}
