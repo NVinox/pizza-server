@@ -1,5 +1,7 @@
 import { HttpResponse } from "../domain/index.domain.js"
 import { ApiError } from "../error/index.error.js"
+import { getEmptyFields } from "../helpers/index.helper.js"
+
 import { PrismaClient } from "@prisma/client"
 
 export class CategoriesController {
@@ -39,9 +41,10 @@ export class CategoriesController {
   create = async (req, res, next) => {
     try {
       const categoryTitle = req.body.text
+      const emptyFields = getEmptyFields({ text: categoryTitle })
 
-      if (!categoryTitle) {
-        return next(ApiError.badRequest("Filed 'text' is required"))
+      if (emptyFields) {
+        return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
       }
 
       const category = await this._prisma.category.create({
@@ -69,6 +72,12 @@ export class CategoriesController {
     try {
       const categoryTitle = req.body.text
       const categoryId = +req.body.id
+      const emptyFields = getEmptyFields({ text: categoryTitle })
+
+      if (emptyFields) {
+        return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
+      }
+
       const foundCategory = await this._prisma.category.findUnique({
         where: {
           id: categoryId,
@@ -79,14 +88,6 @@ export class CategoriesController {
         return next(
           ApiError.notFound(`Category 'id = ${categoryId}' does not exist`)
         )
-      }
-
-      if (!categoryId) {
-        return next(ApiError.badRequest("Filed 'id' is required"))
-      }
-
-      if (!categoryTitle) {
-        return next(ApiError.badRequest("Filed 'text' is required"))
       }
 
       const updatedCategory = await this._prisma.category.update({
