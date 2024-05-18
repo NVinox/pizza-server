@@ -89,7 +89,7 @@ export class SortCategoriesController {
       if (!foundSortCategory) {
         return next(
           ApiError.notFound(
-            `Sort category 'id = ${sortCategoryId}' does not exist`
+            `Sort category id '${sortCategoryId}' does not exist`
           )
         )
       }
@@ -130,7 +130,7 @@ export class SortCategoriesController {
       if (!foundSortCategory) {
         return next(
           ApiError.notFound(
-            `Sort category 'id = ${sortCategoryId}' does not exist`
+            `Sort category id '${sortCategoryId}' does not exist`
           )
         )
       }
