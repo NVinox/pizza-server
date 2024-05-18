@@ -15,6 +15,19 @@ export class CategoriesController {
         orderBy: { id: "asc" },
       })
 
+      if (!categories.length) {
+        return res
+          .status(204)
+          .json(
+            new HttpResponse(
+              "NO_CONTENT",
+              "NO_CONTENT",
+              "Sort categories list is empty",
+              categories
+            )
+          )
+      }
+
       return res
         .status(200)
         .json(new HttpResponse("OK", "OK", "Categories list", categories))
