@@ -10,6 +10,7 @@ export class HttpResponse {
     const statusCodes = {
       OK: 200,
       CREATED: 201,
+      NO_CONTENT: 204,
     }
 
     return statusCodes[statusCode]
@@ -19,6 +20,7 @@ export class HttpResponse {
     const statusCodes = {
       OK: "OK",
       CREATED: "CREATED",
+      NO_CONTENT: "NO_CONTENT",
     }
 
     return statusCodes[httpStatus]
