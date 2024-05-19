@@ -17,15 +17,16 @@ export class ProductsController {
 
   create = async (req, res, next) => {
     try {
-      if (req.files) {
-        const image = this._filesService.saveFile(req.files.image)
+      const file = req.files
+
+      if (file) {
+        const image = this._filesService.saveFile(file.image)
         const raiting = req.body.raiting ? +req.body.raiting : undefined
-        const basePrice = req.files.basePrice ? +req.files.basePrice : undefined
+        const basePrice = req.body.basePrice ? +req.body.basePrice : undefined
         const body = {
           title: req.body.title,
           description: req.body.description,
           image,
-          raiting,
           basePrice,
         }
         const emptyFields = getEmptyFields(body)
@@ -37,7 +38,7 @@ export class ProductsController {
         }
 
         const product = await this._prisma.product.create({
-          data: body,
+          data: { ...body, raiting },
           include: { categories: true, sizes: true, types: true },
         })
 
@@ -159,6 +160,33 @@ export class ProductsController {
       }
 
       return next(ApiError.badRequest("Field 'image' does not exist"))
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
+      return next(ApiError.internal())
+    }
+  }
+
+  delete = async (req, res, next) => {
+    try {
+      const id = Number(req.params.id)
+
+      if (isNaN(id)) {
+        return next(ApiError.badRequest("Parameter 'id' must be a number"))
+      }
+
+      const deletedProduct = await this._prisma.product.delete({
+        where: { id },
+        include: { categories: true, sizes: true, types: true },
+      })
+
+      return res
+        .status(200)
+        .json(
+          new HttpResponse("OK", "OK", "Product is deleted", deletedProduct)
+        )
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         return next(ApiError.throwKnownError(error.code, error.meta))
