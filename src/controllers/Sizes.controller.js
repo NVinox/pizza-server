@@ -95,4 +95,29 @@ export class SizesController {
       return next(ApiError.internal())
     }
   }
+
+  delete = async (req, res, next) => {
+    try {
+      const id = req.body.id
+      const emptyFields = getEmptyFields({ id })
+
+      if (emptyFields) {
+        return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
+      }
+
+      const deletedSize = await this._prisma.size.delete({
+        where: { id },
+      })
+
+      return res
+        .status(200)
+        .json(new HttpResponse("OK", "OK", "Size is deleted", deletedSize))
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
+      return next(ApiError.internal())
+    }
+  }
 }
