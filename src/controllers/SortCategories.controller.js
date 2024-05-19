@@ -2,7 +2,7 @@ import { HttpResponse } from "../domain/index.domain.js"
 import { ApiError } from "../error/index.error.js"
 import { getEmptyFields } from "../helpers/index.helper.js"
 
-import { PrismaClient } from "@prisma/client"
+import { Prisma, PrismaClient } from "@prisma/client"
 
 export class SortCategoriesController {
   _prisma
@@ -36,8 +36,12 @@ export class SortCategoriesController {
             sortCategory
           )
         )
-    } catch (e) {
-      return next(ApiError.internal())
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
+      return next(ApiError.badRequest(error))
     }
   }
 
@@ -66,7 +70,11 @@ export class SortCategoriesController {
           new HttpResponse("OK", "OK", "Sort categories list", sortCategories)
         )
     } catch (error) {
-      return next(ApiError.internal())
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
+      return next(ApiError.badRequest(error))
     }
   }
 
@@ -78,20 +86,6 @@ export class SortCategoriesController {
 
       if (emptyFields) {
         return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
-      }
-
-      const foundSortCategory = await this._prisma.sortCategory.findUnique({
-        where: {
-          id: sortCategoryId,
-        },
-      })
-
-      if (!foundSortCategory) {
-        return next(
-          ApiError.notFound(
-            `Sort category id '${sortCategoryId}' does not exist`
-          )
-        )
       }
 
       const updatedSortCategory = await this._prisma.sortCategory.update({
@@ -113,26 +107,22 @@ export class SortCategoriesController {
             updatedSortCategory
           )
         )
-    } catch {
-      return next(ApiError.internal())
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
+      return next(ApiError.badRequest(error))
     }
   }
 
   delete = async (req, res, next) => {
     try {
       const sortCategoryId = +req.body.id
-      const foundSortCategory = await this._prisma.sortCategory.findUnique({
-        where: {
-          id: sortCategoryId,
-        },
-      })
+      const emptyFields = getEmptyFields({ id: sortCategoryId })
 
-      if (!foundSortCategory) {
-        return next(
-          ApiError.notFound(
-            `Sort category id '${sortCategoryId}' does not exist`
-          )
-        )
+      if (emptyFields) {
+        return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
       }
 
       const deletedCategory = await this._prisma.sortCategory.delete({
@@ -151,8 +141,12 @@ export class SortCategoriesController {
             deletedCategory
           )
         )
-    } catch {
-      return next(ApiError.internal())
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
+      return next(ApiError.badRequest(error))
     }
   }
 }
