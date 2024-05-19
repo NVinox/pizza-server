@@ -1,5 +1,5 @@
 import { HttpResponse } from "../domain/index.domain.js"
-import { ApiError } from "../error/index.error.js"
+import { ApiError as APIError, ApiError } from "../error/index.error.js"
 import { getEmptyFields } from "../helpers/index.helper.js"
 
 import { PrismaClient, Prisma } from "@prisma/client"
@@ -11,13 +11,40 @@ export class SizesController {
     this._prisma = new PrismaClient()
   }
 
+  create = async (req, res, next) => {
+    try {
+      const body = {
+        size: req.body.size,
+      }
+      const emptyFields = getEmptyFields(body)
+
+      if (emptyFields) {
+        next(APIError.badRequest(`Fields '${emptyFields}' is required`))
+      }
+
+      const size = await this._prisma.size.create({
+        data: body,
+      })
+
+      return res
+        .status(201)
+        .json(new HttpResponse("CREATED", "CREATED", "Size is created", size))
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
+      return next(ApiError.internal())
+    }
+  }
+
   getAll = async (req, res, next) => {
     try {
-      const doughList = await this._prisma.size.findMany({
+      const sizes = await this._prisma.size.findMany({
         orderBy: { id: "asc" },
       })
 
-      if (!doughList.length) {
+      if (!sizes.length) {
         return res
           .status(204)
           .json(
@@ -25,14 +52,14 @@ export class SizesController {
               "NO_CONTENT",
               "NO_CONTENT",
               "Dough list is empty",
-              doughList
+              sizes
             )
           )
       }
 
       return res
         .status(200)
-        .json(new HttpResponse("OK", "OK", "Dough list", doughList))
+        .json(new HttpResponse("OK", "OK", "Sizes list", sizes))
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         return next(ApiError.throwKnownError(error.code, error.meta))
