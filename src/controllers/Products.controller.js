@@ -86,10 +86,28 @@ export class ProductsController {
   getAlone = async (req, res, next) => {
     try {
       const productId = Number(req.params.id)
+
+      if (isNaN(productId)) {
+        return next(ApiError.badRequest(`Parameter 'id' must be a number`))
+      }
+
       const product = await this._prisma.product.findUnique({
         where: { id: productId },
         include: { categories: true, sizes: true, types: true },
       })
+
+      if (!product) {
+        return res
+          .status(204)
+          .json(
+            new HttpResponse(
+              "NO_CONTENT",
+              "NO_CONTENT",
+              "Products list is empty",
+              product
+            )
+          )
+      }
 
       return res
         .status(200)
