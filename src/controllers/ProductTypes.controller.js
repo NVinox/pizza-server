@@ -110,4 +110,35 @@ export class ProductTypesController {
       return next(ApiError.internal())
     }
   }
+
+  delete = async (req, res, next) => {
+    try {
+      const id = Number(req.params.id)
+
+      if (isNaN(id)) {
+        return next(ApiError.badRequest("Parameter 'id' must be a number"))
+      }
+
+      const deletedProductType = await this._prisma.productType.delete({
+        where: { id },
+      })
+
+      return res
+        .status(200)
+        .json(
+          new HttpResponse(
+            "OK",
+            "OK",
+            "Product type is deleted",
+            deletedProductType
+          )
+        )
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
+      return next(ApiError.internal())
+    }
+  }
 }
