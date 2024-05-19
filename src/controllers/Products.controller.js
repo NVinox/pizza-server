@@ -82,4 +82,24 @@ export class ProductsController {
       return next(ApiError.internal())
     }
   }
+
+  getAlone = async (req, res, next) => {
+    try {
+      const productId = Number(req.params.id)
+      const product = await this._prisma.product.findUnique({
+        where: { id: productId },
+        include: { categories: true, sizes: true, types: true },
+      })
+
+      return res
+        .status(200)
+        .json(new HttpResponse("OK", "OK", "Product details", product))
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
+      return next(ApiError.internal())
+    }
+  }
 }
