@@ -6,5 +6,6 @@ const sizeRouter = Router()
 
 sizeRouter.post("/", sizeController.create)
 sizeRouter.get("/", sizeController.getAll)
+sizeRouter.put("/", sizeController.update)
 
 export default sizeRouter

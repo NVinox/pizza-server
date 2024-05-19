@@ -68,4 +68,31 @@ export class SizesController {
       return next(ApiError.internal())
     }
   }
+
+  update = async (req, res, next) => {
+    try {
+      const id = req.body.id
+      const size = req.body.size
+      const emptyFields = getEmptyFields({ id, size })
+
+      if (emptyFields) {
+        return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
+      }
+
+      const updatedSize = await this._prisma.size.update({
+        data: { size },
+        where: { id },
+      })
+
+      return res
+        .status(200)
+        .json(new HttpResponse("OK", "OK", "Size is updated", updatedSize))
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
+      return next(ApiError.internal())
+    }
+  }
 }
