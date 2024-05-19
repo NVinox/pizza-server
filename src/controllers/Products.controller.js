@@ -39,7 +39,11 @@ export class ProductsController {
 
         const product = await this._prisma.product.create({
           data: { ...body, raiting },
-          include: { categories: true, sizes: true, types: true },
+          include: {
+            categories: true,
+            sizes: true,
+            types: { select: { id: true, additionalPrice: true } },
+          },
         })
 
         return res
@@ -61,7 +65,11 @@ export class ProductsController {
     try {
       const products = await this._prisma.product.findMany({
         orderBy: { id: "asc" },
-        include: { categories: true, sizes: true, types: true },
+        include: {
+          categories: true,
+          sizes: true,
+          types: { select: { id: true, additionalPrice: true } },
+        },
       })
 
       if (!products.length) {
@@ -99,7 +107,11 @@ export class ProductsController {
 
       const product = await this._prisma.product.findUnique({
         where: { id: productId },
-        include: { categories: true, sizes: true, types: true },
+        include: {
+          categories: true,
+          sizes: true,
+          types: { select: { id: true, additionalPrice: true } },
+        },
       })
 
       if (!product) {
@@ -151,7 +163,11 @@ export class ProductsController {
         const product = await this._prisma.product.update({
           where: { id },
           data: { ...body, raiting, basePrice },
-          include: { categories: true, sizes: true, types: true },
+          include: {
+            categories: true,
+            sizes: true,
+            types: { select: { id: true, additionalPrice: true } },
+          },
         })
 
         return res
@@ -179,7 +195,11 @@ export class ProductsController {
 
       const deletedProduct = await this._prisma.product.delete({
         where: { id },
-        include: { categories: true, sizes: true, types: true },
+        include: {
+          categories: true,
+          sizes: true,
+          types: { select: { id: true, additionalPrice: true } },
+        },
       })
 
       return res
