@@ -74,4 +74,40 @@ export class ProductTypesController {
       return next(ApiError.internal())
     }
   }
+
+  update = async (req, res, next) => {
+    try {
+      const id = Number(req.params.id)
+
+      if (isNaN(id)) {
+        return next(ApiError.badRequest("Parameter 'id' must be a number"))
+      }
+
+      const updatedProductType = await this._prisma.productType.update({
+        where: {
+          id,
+        },
+        data: {
+          additionalPrice: req.body.additionalPrice,
+        },
+      })
+
+      return res
+        .status(200)
+        .json(
+          new HttpResponse(
+            "OK",
+            "OK",
+            "Product type is updated",
+            updatedProductType
+          )
+        )
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
+      return next(ApiError.internal())
+    }
+  }
 }

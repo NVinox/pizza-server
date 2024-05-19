@@ -6,5 +6,6 @@ const productTypeRouter = Router()
 
 productTypeRouter.post("/", productController.create)
 productTypeRouter.get("/", productController.getAll)
+productTypeRouter.put("/:id", productController.update)
 
 export default productTypeRouter
