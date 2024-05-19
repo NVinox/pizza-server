@@ -41,7 +41,7 @@ export class ProductsController {
           data: { ...body, raiting },
           include: {
             categories: true,
-            sizes: true,
+            sizes: { select: { id: true, additionalPrice: true } },
             types: { select: { id: true, additionalPrice: true } },
           },
         })
@@ -67,7 +67,7 @@ export class ProductsController {
         orderBy: { id: "asc" },
         include: {
           categories: true,
-          sizes: true,
+          sizes: { select: { id: true, additionalPrice: true } },
           types: { select: { id: true, additionalPrice: true } },
         },
       })
@@ -109,7 +109,7 @@ export class ProductsController {
         where: { id: productId },
         include: {
           categories: true,
-          sizes: true,
+          sizes: { select: { id: true, additionalPrice: true } },
           types: { select: { id: true, additionalPrice: true } },
         },
       })
@@ -165,7 +165,7 @@ export class ProductsController {
           data: { ...body, raiting, basePrice },
           include: {
             categories: true,
-            sizes: true,
+            sizes: { select: { id: true, additionalPrice: true } },
             types: { select: { id: true, additionalPrice: true } },
           },
         })
@@ -197,7 +197,7 @@ export class ProductsController {
         where: { id },
         include: {
           categories: true,
-          sizes: true,
+          sizes: { select: { id: true, additionalPrice: true } },
           types: { select: { id: true, additionalPrice: true } },
         },
       })
