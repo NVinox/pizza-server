@@ -11,6 +11,39 @@ export class ProductTypesController {
     this._prisma = new PrismaClient()
   }
 
+  create = async (req, res, next) => {
+    try {
+      const body = {
+        productId: req.body.productId,
+        additionalPrice: req.body.additionalPrice,
+      }
+      const emptyFields = getEmptyFields(body)
+
+      if (emptyFields) {
+        return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
+      }
+
+      const productType = await this._prisma.productType.create({
+        data: {
+          productId: req.body.productId,
+          additionalPrice: req.body.additionalPrice,
+        },
+      })
+
+      return res
+        .status(201)
+        .json(
+          new HttpResponse("OK", "OK", "Product type is created", productType)
+        )
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
+      return next(ApiError.internal())
+    }
+  }
+
   getAll = async (req, res, next) => {
     try {
       const productTypes = await this._prisma.productType.findMany({

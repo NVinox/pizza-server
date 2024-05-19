@@ -4,6 +4,7 @@ import { ProductTypesController } from "../controllers/ProductTypes.controller.j
 const productController = new ProductTypesController()
 const productTypeRouter = Router()
 
-productTypeRouter.use("/", productController.getAll)
+productTypeRouter.post("/", productController.create)
+productTypeRouter.get("/", productController.getAll)
 
 export default productTypeRouter

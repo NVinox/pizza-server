@@ -7,7 +7,7 @@ export class ApiError extends Error {
   }
 
   static throwKnownError(errorCode, meta) {
-    const errorCodes = { P2025: 404, P2002: 400 }
+    const errorCodes = { P2025: 404, P2002: 400, P2003: 404 }
 
     if (errorCodes[errorCode]) {
       return new ApiError(errorCodes[errorCode], meta)
