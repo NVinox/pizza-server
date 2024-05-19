@@ -2,7 +2,7 @@ import { HttpResponse } from "../domain/index.domain.js"
 import { ApiError } from "../error/index.error.js"
 import { getEmptyFields } from "../helpers/index.helper.js"
 
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient, Prisma } from "@prisma/client"
 
 export class DoughController {
   _prisma
@@ -27,8 +27,12 @@ export class DoughController {
         .json(
           new HttpResponse("CREATED", "CREATED", "Dough type is created", dough)
         )
-    } catch {
-      return next(ApiError.internal())
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
+      return next(ApiError.badRequest(error))
     }
   }
 
@@ -54,7 +58,11 @@ export class DoughController {
       return res
         .status(200)
         .json(new HttpResponse("OK", "OK", "Dough list", doughList))
-    } catch {
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
       return next(ApiError.internal())
     }
   }
@@ -69,14 +77,6 @@ export class DoughController {
         return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
       }
 
-      const foundDough = await this._prisma.dough.findUnique({
-        where: { id: doughId },
-      })
-
-      if (!foundDough) {
-        return next(ApiError.notFound(`Dough id '${doughId}' does not exist`))
-      }
-
       const updatedDough = await this._prisma.dough.update({
         data: { caption: doughCaption },
         where: { id: doughId },
@@ -87,7 +87,11 @@ export class DoughController {
         .json(
           new HttpResponse("OK", "OK", "Dough type is updated", updatedDough)
         )
-    } catch {
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
       return next(ApiError.internal())
     }
   }
@@ -101,14 +105,6 @@ export class DoughController {
         return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
       }
 
-      const foundDough = await this._prisma.dough.findUnique({
-        where: { id: doughId },
-      })
-
-      if (!foundDough) {
-        next(ApiError.notFound(`Dough id '${doughId}' does not exist`))
-      }
-
       const deletedDough = await this._prisma.dough.delete({
         where: { id: doughId },
       })
@@ -118,7 +114,11 @@ export class DoughController {
         .json(
           new HttpResponse("OK", "OK", "Dough type is deleted", deletedDough)
         )
-    } catch {
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
       return next(ApiError.internal())
     }
   }

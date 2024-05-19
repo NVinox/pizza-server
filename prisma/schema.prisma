@@ -9,12 +9,12 @@ datasource db {
 
 model Category {
   id   Int    @id @default(autoincrement())
-  text String
+  text String @unique
 }
 
 model SortCategory {
   id   Int    @id @default(autoincrement())
-  text String
+  text String @unique
 }
 
 model Dough {
