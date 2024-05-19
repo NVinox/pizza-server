@@ -19,13 +19,14 @@ export class ProductsController {
     try {
       if (req.files) {
         const image = this._filesService.saveFile(req.files.image)
-        const raiting = req.body.raiting ? +req.body.raiting : null
+        const raiting = req.body.raiting ? +req.body.raiting : undefined
+        const basePrice = req.files.basePrice ? +req.files.basePrice : undefined
         const body = {
           title: req.body.title,
           description: req.body.description,
           image,
           raiting,
-          basePrice: +req.body.basePrice,
+          basePrice,
         }
         const emptyFields = getEmptyFields(body)
 
@@ -34,7 +35,11 @@ export class ProductsController {
             ApiError.badRequest(`Fields '${emptyFields}' is required`)
           )
         }
-        const product = await this._prisma.product.create({ data: body })
+
+        const product = await this._prisma.product.create({
+          data: body,
+          include: { categories: true, sizes: true, types: true },
+        })
 
         return res
           .status(201)
@@ -112,6 +117,48 @@ export class ProductsController {
       return res
         .status(200)
         .json(new HttpResponse("OK", "OK", "Product details", product))
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
+      return next(ApiError.internal())
+    }
+  }
+
+  update = async (req, res, next) => {
+    try {
+      const file = req.files
+
+      if (file) {
+        const id = Number(req.params.id)
+
+        if (isNaN(id)) {
+          return next(ApiError.badRequest("Parameter 'id' must be a number"))
+        }
+
+        const image = file ? this._filesService.saveFile(file.image) : undefined
+        const raiting = req.body.raiting ? +req.body.raiting : undefined
+        const basePrice = req.files.basePrice ? +req.files.basePrice : undefined
+        const body = {
+          id,
+          title: req.body.title,
+          description: req.body.description,
+          image,
+        }
+
+        const product = await this._prisma.product.update({
+          where: { id },
+          data: { ...body, raiting, basePrice },
+          include: { categories: true, sizes: true, types: true },
+        })
+
+        return res
+          .status(200)
+          .json(new HttpResponse("OK", "OK", "Product is updated", product))
+      }
+
+      return next(ApiError.badRequest("Field 'image' does not exist"))
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         return next(ApiError.throwKnownError(error.code, error.meta))
