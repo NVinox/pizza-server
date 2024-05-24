@@ -63,7 +63,15 @@ export class ProductsController {
                 selectable: true,
               },
             },
-            types: { select: { id: true, additionalPrice: true } },
+            types: {
+              orderBy: { caption: "asc" },
+              select: {
+                id: true,
+                additionalPrice: true,
+                caption: true,
+                selectable: true,
+              },
+            },
           },
         })
 
@@ -101,7 +109,15 @@ export class ProductsController {
               selectable: true,
             },
           },
-          types: { select: { id: true, additionalPrice: true } },
+          types: {
+            orderBy: { caption: "asc" },
+            select: {
+              id: true,
+              additionalPrice: true,
+              caption: true,
+              selectable: true,
+            },
+          },
         },
       })
 
@@ -147,7 +163,15 @@ export class ProductsController {
               selectable: true,
             },
           },
-          types: { select: { id: true, additionalPrice: true } },
+          types: {
+            orderBy: { caption: "asc" },
+            select: {
+              id: true,
+              additionalPrice: true,
+              caption: true,
+              selectable: true,
+            },
+          },
         },
       })
 
@@ -217,8 +241,24 @@ export class ProductsController {
           },
           include: {
             categories: true,
-            sizes: { select: { id: true, additionalPrice: true } },
-            types: { select: { id: true, additionalPrice: true } },
+            sizes: {
+              orderBy: { size: "asc" },
+              select: {
+                id: true,
+                additionalPrice: true,
+                size: true,
+                selectable: true,
+              },
+            },
+            types: {
+              orderBy: { caption: "asc" },
+              select: {
+                id: true,
+                additionalPrice: true,
+                caption: true,
+                selectable: true,
+              },
+            },
           },
         })
 
