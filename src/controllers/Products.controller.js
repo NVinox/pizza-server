@@ -23,6 +23,13 @@ export class ProductsController {
         const image = this._filesService.saveFile(file.image)
         const raiting = req.body.raiting ? +req.body.raiting : undefined
         const basePrice = req.body.basePrice ? +req.body.basePrice : undefined
+        const categories = JSON.parse(req.body.categories).map((id) => ({
+          category: {
+            connect: {
+              id,
+            },
+          },
+        }))
         const body = {
           title: req.body.title,
           description: req.body.description,
@@ -38,13 +45,23 @@ export class ProductsController {
         }
 
         const product = await this._prisma.product.create({
-          data: { ...body, raiting },
+          data: {
+            ...body,
+            raiting,
+            categories: {
+              create: categories,
+            },
+          },
           include: {
             categories: true,
             sizes: { select: { id: true, additionalPrice: true } },
             types: { select: { id: true, additionalPrice: true } },
           },
         })
+
+        product.categories = product.categories.map(
+          ({ categoryId }) => categoryId
+        )
 
         return res
           .status(201)
@@ -63,7 +80,7 @@ export class ProductsController {
 
   getAll = async (req, res, next) => {
     try {
-      const products = await this._prisma.product.findMany({
+      const productsFetch = await this._prisma.product.findMany({
         orderBy: { id: "asc" },
         include: {
           categories: true,
@@ -72,18 +89,20 @@ export class ProductsController {
         },
       })
 
-      if (!products.length) {
-        return res
-          .status(204)
-          .json(
-            new HttpResponse(
-              "NO_CONTENT",
-              "NO_CONTENT",
-              "Products list is empty",
-              products
-            )
-          )
+      if (!productsFetch.length) {
+        return res.status(204).json("")
       }
+
+      const products = productsFetch.map((product) => ({
+        id: product.id,
+        title: product.title,
+        description: product.description,
+        image: product.image,
+        raiting: product.raiting,
+        categories: product.categories.map(({ categoryId }) => categoryId),
+        sizes: product.sizes,
+        types: product.types,
+      }))
 
       return res
         .status(200)
@@ -115,17 +134,12 @@ export class ProductsController {
       })
 
       if (!product) {
-        return res
-          .status(204)
-          .json(
-            new HttpResponse(
-              "NO_CONTENT",
-              "NO_CONTENT",
-              "Products list is empty",
-              product
-            )
-          )
+        return res.status(204).json("")
       }
+
+      product.categories = product.categories.map(
+        ({ categoryId }) => categoryId
+      )
 
       return res
         .status(200)
@@ -159,16 +173,40 @@ export class ProductsController {
           description: req.body.description,
           image,
         }
+        const categories = JSON.parse(req.body.categories).map((id) => ({
+          category: {
+            connect: {
+              id,
+            },
+          },
+        }))
+
+        await this._prisma.categoriesOnProduct.deleteMany({
+          where: {
+            productId: id,
+          },
+        })
 
         const product = await this._prisma.product.update({
           where: { id },
-          data: { ...body, raiting, basePrice },
+          data: {
+            ...body,
+            raiting,
+            basePrice,
+            categories: {
+              create: categories,
+            },
+          },
           include: {
             categories: true,
             sizes: { select: { id: true, additionalPrice: true } },
             types: { select: { id: true, additionalPrice: true } },
           },
         })
+
+        product.categories = product.categories.map(
+          ({ categoryId }) => categoryId
+        )
 
         return res
           .status(200)
@@ -192,6 +230,22 @@ export class ProductsController {
       if (isNaN(id)) {
         return next(ApiError.badRequest("Parameter 'id' must be a number"))
       }
+
+      await this._prisma.categoriesOnProduct.deleteMany({
+        where: {
+          productId: id,
+        },
+      })
+      await this._prisma.productType.deleteMany({
+        where: {
+          productId: id,
+        },
+      })
+      await this._prisma.productSize.deleteMany({
+        where: {
+          productId: id,
+        },
+      })
 
       const deletedProduct = await this._prisma.product.delete({
         where: { id },
