@@ -13,9 +13,14 @@ export class ProductTypesController {
 
   create = async (req, res, next) => {
     try {
+      const productId = req.body.productId
+      const caption = req.body.caption
+      const selectable = req.body.selectable
+      const additionalPrice = req.body.additionalPrice
       const body = {
-        productId: req.body.productId,
-        additionalPrice: req.body.additionalPrice,
+        productId,
+        additionalPrice,
+        caption,
       }
       const emptyFields = getEmptyFields(body)
 
@@ -25,8 +30,8 @@ export class ProductTypesController {
 
       const productType = await this._prisma.productType.create({
         data: {
-          productId: req.body.productId,
-          additionalPrice: req.body.additionalPrice,
+          selectable,
+          ...body,
         },
       })
 
@@ -88,6 +93,8 @@ export class ProductTypesController {
           id,
         },
         data: {
+          caption: req.body.caption,
+          selectable: req.body.selectable,
           additionalPrice: req.body.additionalPrice,
         },
       })

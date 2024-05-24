@@ -10,7 +10,7 @@ datasource db {
 model Category {
   id                  Int                   @id @default(autoincrement())
   text                String                @unique
-  CategoriesOnProduct CategoriesOnProduct[]
+  categoriesOnProduct CategoriesOnProduct[]
 }
 
 model SortCategory {
@@ -18,28 +18,22 @@ model SortCategory {
   text String @unique
 }
 
-model Dough {
-  id      Int    @id @default(autoincrement())
-  caption String @unique
-}
-
-model Size {
-  id   Int @id @default(autoincrement())
-  size Int @unique
-}
-
 model ProductSize {
   id              Int     @id @default(autoincrement())
   productId       Int
+  size            Int
   additionalPrice Int
-  Product         Product @relation(fields: [productId], references: [id])
+  selectable      Boolean @default(false)
+  product         Product @relation(fields: [productId], references: [id])
 }
 
 model ProductType {
   id              Int     @id @default(autoincrement())
   productId       Int
+  caption         String
   additionalPrice Int
-  Product         Product @relation(fields: [productId], references: [id])
+  selectable      Boolean @default(false)
+  product         Product @relation(fields: [productId], references: [id])
 }
 
 model Product {

@@ -13,9 +13,14 @@ export class ProductSizesController {
 
   create = async (req, res, next) => {
     try {
+      const productId = req.body.productId
+      const size = req.body.size
+      const selectable = req.body.selectable
+      const additionalPrice = req.body.additionalPrice
       const body = {
-        productId: req.body.productId,
-        additionalPrice: req.body.additionalPrice,
+        productId,
+        size,
+        additionalPrice,
       }
       const emptyFields = getEmptyFields(body)
 
@@ -25,8 +30,8 @@ export class ProductSizesController {
 
       const productSize = await this._prisma.productSize.create({
         data: {
-          productId: req.body.productId,
-          additionalPrice: req.body.additionalPrice,
+          selectable,
+          ...body,
         },
       })
 
@@ -78,6 +83,9 @@ export class ProductSizesController {
   update = async (req, res, next) => {
     try {
       const id = Number(req.params.id)
+      const size = req.body.size
+      const selectable = req.body.selectable
+      const additionalPrice = req.body.additionalPrice
 
       if (isNaN(id)) {
         return next(ApiError.badRequest("Parameter 'id' must be a number"))
@@ -88,7 +96,9 @@ export class ProductSizesController {
           id,
         },
         data: {
-          additionalPrice: req.body.additionalPrice,
+          size,
+          selectable,
+          additionalPrice,
         },
       })
 

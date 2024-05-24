@@ -54,8 +54,24 @@ export class ProductsController {
           },
           include: {
             categories: true,
-            sizes: { select: { id: true, additionalPrice: true } },
-            types: { select: { id: true, additionalPrice: true } },
+            sizes: {
+              orderBy: { size: "asc" },
+              select: {
+                id: true,
+                additionalPrice: true,
+                size: true,
+                selectable: true,
+              },
+            },
+            types: {
+              orderBy: { caption: "asc" },
+              select: {
+                id: true,
+                additionalPrice: true,
+                caption: true,
+                selectable: true,
+              },
+            },
           },
         })
 
@@ -84,8 +100,24 @@ export class ProductsController {
         orderBy: { id: "asc" },
         include: {
           categories: true,
-          sizes: { select: { id: true, additionalPrice: true } },
-          types: { select: { id: true, additionalPrice: true } },
+          sizes: {
+            orderBy: { size: "asc" },
+            select: {
+              id: true,
+              additionalPrice: true,
+              size: true,
+              selectable: true,
+            },
+          },
+          types: {
+            orderBy: { caption: "asc" },
+            select: {
+              id: true,
+              additionalPrice: true,
+              caption: true,
+              selectable: true,
+            },
+          },
         },
       })
 
@@ -94,14 +126,8 @@ export class ProductsController {
       }
 
       const products = productsFetch.map((product) => ({
-        id: product.id,
-        title: product.title,
-        description: product.description,
-        image: product.image,
-        raiting: product.raiting,
+        ...product,
         categories: product.categories.map(({ categoryId }) => categoryId),
-        sizes: product.sizes,
-        types: product.types,
       }))
 
       return res
@@ -128,8 +154,24 @@ export class ProductsController {
         where: { id: productId },
         include: {
           categories: true,
-          sizes: { select: { id: true, additionalPrice: true } },
-          types: { select: { id: true, additionalPrice: true } },
+          sizes: {
+            orderBy: { size: "asc" },
+            select: {
+              id: true,
+              additionalPrice: true,
+              size: true,
+              selectable: true,
+            },
+          },
+          types: {
+            orderBy: { caption: "asc" },
+            select: {
+              id: true,
+              additionalPrice: true,
+              caption: true,
+              selectable: true,
+            },
+          },
         },
       })
 
@@ -155,65 +197,76 @@ export class ProductsController {
 
   update = async (req, res, next) => {
     try {
-      const file = req.files
+      const id = Number(req.params.id)
 
-      if (file) {
-        const id = Number(req.params.id)
-
-        if (isNaN(id)) {
-          return next(ApiError.badRequest("Parameter 'id' must be a number"))
-        }
-
-        const image = file ? this._filesService.saveFile(file.image) : undefined
-        const raiting = req.body.raiting ? +req.body.raiting : undefined
-        const basePrice = req.files.basePrice ? +req.files.basePrice : undefined
-        const body = {
-          id,
-          title: req.body.title,
-          description: req.body.description,
-          image,
-        }
-        const categories = JSON.parse(req.body.categories).map((id) => ({
-          category: {
-            connect: {
-              id,
-            },
-          },
-        }))
-
-        await this._prisma.categoriesOnProduct.deleteMany({
-          where: {
-            productId: id,
-          },
-        })
-
-        const product = await this._prisma.product.update({
-          where: { id },
-          data: {
-            ...body,
-            raiting,
-            basePrice,
-            categories: {
-              create: categories,
-            },
-          },
-          include: {
-            categories: true,
-            sizes: { select: { id: true, additionalPrice: true } },
-            types: { select: { id: true, additionalPrice: true } },
-          },
-        })
-
-        product.categories = product.categories.map(
-          ({ categoryId }) => categoryId
-        )
-
-        return res
-          .status(200)
-          .json(new HttpResponse("OK", "OK", "Product is updated", product))
+      if (isNaN(id)) {
+        return next(ApiError.badRequest("Parameter 'id' must be a number"))
       }
 
-      return next(ApiError.badRequest("Field 'image' does not exist"))
+      const file = req.files
+      const image = file ? this._filesService.saveFile(file.image) : undefined
+      const raiting = req.body.raiting ? +req.body.raiting : undefined
+      const basePrice = req.body.basePrice ? +req.body.basePrice : undefined
+      const body = {
+        id,
+        title: req.body.title,
+        description: req.body.description,
+        image,
+      }
+      const categories = JSON.parse(req.body.categories).map((id) => ({
+        category: {
+          connect: {
+            id,
+          },
+        },
+      }))
+
+      await this._prisma.categoriesOnProduct.deleteMany({
+        where: {
+          productId: id,
+        },
+      })
+
+      const product = await this._prisma.product.update({
+        where: { id },
+        data: {
+          ...body,
+          raiting,
+          basePrice,
+          categories: {
+            create: categories,
+          },
+        },
+        include: {
+          categories: true,
+          sizes: {
+            orderBy: { size: "asc" },
+            select: {
+              id: true,
+              additionalPrice: true,
+              size: true,
+              selectable: true,
+            },
+          },
+          types: {
+            orderBy: { caption: "asc" },
+            select: {
+              id: true,
+              additionalPrice: true,
+              caption: true,
+              selectable: true,
+            },
+          },
+        },
+      })
+
+      product.categories = product.categories.map(
+        ({ categoryId }) => categoryId
+      )
+
+      return res
+        .status(200)
+        .json(new HttpResponse("OK", "OK", "Product is updated", product))
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         return next(ApiError.throwKnownError(error.code, error.meta))
@@ -251,8 +304,8 @@ export class ProductsController {
         where: { id },
         include: {
           categories: true,
-          sizes: { select: { id: true, additionalPrice: true } },
-          types: { select: { id: true, additionalPrice: true } },
+          sizes: true,
+          types: true,
         },
       })
 
