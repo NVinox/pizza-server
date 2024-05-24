@@ -54,7 +54,15 @@ export class ProductsController {
           },
           include: {
             categories: true,
-            sizes: { select: { id: true, additionalPrice: true } },
+            sizes: {
+              orderBy: { size: "asc" },
+              select: {
+                id: true,
+                additionalPrice: true,
+                size: true,
+                selectable: true,
+              },
+            },
             types: { select: { id: true, additionalPrice: true } },
           },
         })
@@ -84,7 +92,15 @@ export class ProductsController {
         orderBy: { id: "asc" },
         include: {
           categories: true,
-          sizes: { select: { id: true, additionalPrice: true } },
+          sizes: {
+            orderBy: { size: "asc" },
+            select: {
+              id: true,
+              additionalPrice: true,
+              size: true,
+              selectable: true,
+            },
+          },
           types: { select: { id: true, additionalPrice: true } },
         },
       })
@@ -94,14 +110,8 @@ export class ProductsController {
       }
 
       const products = productsFetch.map((product) => ({
-        id: product.id,
-        title: product.title,
-        description: product.description,
-        image: product.image,
-        raiting: product.raiting,
+        ...product,
         categories: product.categories.map(({ categoryId }) => categoryId),
-        sizes: product.sizes,
-        types: product.types,
       }))
 
       return res
@@ -128,7 +138,15 @@ export class ProductsController {
         where: { id: productId },
         include: {
           categories: true,
-          sizes: { select: { id: true, additionalPrice: true } },
+          sizes: {
+            orderBy: { size: "asc" },
+            select: {
+              id: true,
+              additionalPrice: true,
+              size: true,
+              selectable: true,
+            },
+          },
           types: { select: { id: true, additionalPrice: true } },
         },
       })
@@ -251,8 +269,8 @@ export class ProductsController {
         where: { id },
         include: {
           categories: true,
-          sizes: { select: { id: true, additionalPrice: true } },
-          types: { select: { id: true, additionalPrice: true } },
+          sizes: true,
+          types: true,
         },
       })
 
