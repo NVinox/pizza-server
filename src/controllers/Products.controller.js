@@ -96,8 +96,14 @@ export class ProductsController {
 
   getAll = async (req, res, next) => {
     try {
+      const page = Number(req.query.page)
+      const limit = Number(req.query.limit)
+
+      const totalItems = await this._prisma.product.count()
       const productsFetch = await this._prisma.product.findMany({
         orderBy: { id: "asc" },
+        skip: (page - 1) * limit,
+        take: limit,
         include: {
           categories: true,
           sizes: {
@@ -130,9 +136,15 @@ export class ProductsController {
         categories: product.categories.map(({ categoryId }) => categoryId),
       }))
 
-      return res
-        .status(200)
-        .json(new HttpResponse("OK", "OK", "Products list", products))
+      return res.status(200).json(
+        new HttpResponse("OK", "OK", "Products list", {
+          data: products,
+          limit,
+          page,
+          totalItems,
+          totalPages: Math.ceil(totalItems / limit),
+        })
+      )
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         return next(ApiError.throwKnownError(error.code, error.meta))
