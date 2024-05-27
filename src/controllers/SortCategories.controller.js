@@ -2,44 +2,13 @@ import { HttpResponse } from "../domain/index.domain.js"
 import { ApiError } from "../error/index.error.js"
 import { getEmptyFields } from "../helpers/index.helper.js"
 
-import { PrismaClient, Prisma } from "@prisma/client"
+import { Prisma, PrismaClient } from "@prisma/client"
 
-export class CategoriesController {
+export class SortCategoriesController {
   _prisma
 
   constructor() {
     this._prisma = new PrismaClient()
-  }
-
-  getAll = async (req, res, next) => {
-    try {
-      const categories = await this._prisma.category.findMany({
-        orderBy: { id: "asc" },
-      })
-
-      if (!categories.length) {
-        return res
-          .status(204)
-          .json(
-            new HttpResponse(
-              "NO_CONTENT",
-              "NO_CONTENT",
-              "Sort categories list is empty",
-              categories
-            )
-          )
-      }
-
-      return res
-        .status(200)
-        .json(new HttpResponse("OK", "OK", "Categories list", categories))
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        return next(ApiError.throwKnownError(error.code, error.meta))
-      }
-
-      return next(ApiError.badRequest(error))
-    }
   }
 
   create = async (req, res, next) => {
@@ -51,7 +20,7 @@ export class CategoriesController {
         return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
       }
 
-      const category = await this._prisma.category.create({
+      const sortCategory = await this._prisma.sortCategory.create({
         data: {
           text: categoryTitle,
         },
@@ -63,9 +32,42 @@ export class CategoriesController {
           new HttpResponse(
             "CREATED",
             "CREATED",
-            "Category is created",
-            category
+            "Sort category is created",
+            sortCategory
           )
+        )
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return next(ApiError.throwKnownError(error.code, error.meta))
+      }
+
+      return next(ApiError.badRequest(error))
+    }
+  }
+
+  getAll = async (req, res, next) => {
+    try {
+      const sortCategories = await this._prisma.sortCategory.findMany({
+        orderBy: { id: "asc" },
+      })
+
+      if (!sortCategories.length) {
+        return res
+          .status(204)
+          .json(
+            new HttpResponse(
+              "NO_CONTENT",
+              "NO_CONTENT",
+              "Sort categories list is empty",
+              sortCategories
+            )
+          )
+      }
+
+      return res
+        .status(200)
+        .json(
+          new HttpResponse("OK", "OK", "Sort categories list", sortCategories)
         )
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -78,27 +80,32 @@ export class CategoriesController {
 
   update = async (req, res, next) => {
     try {
-      const categoryTitle = req.body.text
-      const categoryId = +req.body.id
-      const emptyFields = getEmptyFields({ text: categoryTitle })
+      const sortCategoryTitle = req.body.text
+      const sortCategoryId = +req.body.id
+      const emptyFields = getEmptyFields({ text: sortCategoryTitle })
 
       if (emptyFields) {
         return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
       }
 
-      const updatedCategory = await this._prisma.category.update({
-        data: {
-          text: categoryTitle,
-        },
+      const updatedSortCategory = await this._prisma.sortCategory.update({
         where: {
-          id: categoryId,
+          id: sortCategoryId,
+        },
+        data: {
+          text: sortCategoryTitle,
         },
       })
 
       return res
         .status(200)
         .json(
-          new HttpResponse("OK", "OK", "Category is updated", updatedCategory)
+          new HttpResponse(
+            "OK",
+            "OK",
+            "Sort category is updated",
+            updatedSortCategory
+          )
         )
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -111,23 +118,28 @@ export class CategoriesController {
 
   delete = async (req, res, next) => {
     try {
-      const categoryId = +req.body.id
-      const emptyFields = getEmptyFields({ id: categoryId })
+      const sortCategoryId = +req.body.id
+      const emptyFields = getEmptyFields({ id: sortCategoryId })
 
       if (emptyFields) {
         return next(ApiError.badRequest(`Fields '${emptyFields}' is required`))
       }
 
-      const deletedCategory = await this._prisma.category.delete({
+      const deletedCategory = await this._prisma.sortCategory.delete({
         where: {
-          id: categoryId,
+          id: sortCategoryId,
         },
       })
 
       return res
         .status(200)
         .json(
-          new HttpResponse("OK", "OK", "Category is deleted", deletedCategory)
+          new HttpResponse(
+            "OK",
+            "OK",
+            "Sort category is deleted",
+            deletedCategory
+          )
         )
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {

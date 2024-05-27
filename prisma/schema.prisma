@@ -8,6 +8,51 @@ datasource db {
 }
 
 model Category {
+  id                  Int                   @id @default(autoincrement())
+  text                String                @unique
+  categoriesOnProduct CategoriesOnProduct[]
+}
+
+model SortCategory {
   id   Int    @id @default(autoincrement())
-  text String
+  text String @unique
+}
+
+model ProductSize {
+  id              Int     @id @default(autoincrement())
+  productId       Int
+  size            Int
+  additionalPrice Int
+  selectable      Boolean @default(false)
+  product         Product @relation(fields: [productId], references: [id])
+}
+
+model ProductType {
+  id              Int     @id @default(autoincrement())
+  productId       Int
+  caption         String
+  additionalPrice Int
+  selectable      Boolean @default(false)
+  product         Product @relation(fields: [productId], references: [id])
+}
+
+model Product {
+  id          Int                   @id @default(autoincrement())
+  title       String
+  description String
+  image       String                @unique
+  raiting     Int                   @default(1)
+  basePrice   Int
+  categories  CategoriesOnProduct[]
+  sizes       ProductSize[]
+  types       ProductType[]
+}
+
+model CategoriesOnProduct {
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  Int
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+
+  @@id([productId, categoryId])
 }
