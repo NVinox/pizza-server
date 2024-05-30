@@ -4,12 +4,12 @@ WORKDIR /pizza-server
 
 COPY package*.json ./
 
+COPY . .
+
 RUN npm install
 
 COPY prisma ./prisma
 
 RUN npx prisma generate
-
-COPY . .
 
 CMD ["npm", "start"]
